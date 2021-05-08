@@ -66,8 +66,8 @@ df = explode_df.select(
     col("text"),
     col("id"),
     col("followers_count"),
-    col("friends_count"),
-    col("statuses_count"),
+    col("friends_count").alias("followed_count"),
+    col("statuses_count").alias("tweet_count"),
     udfgetTeamTag(col("text")).alias("team")
 )
 
