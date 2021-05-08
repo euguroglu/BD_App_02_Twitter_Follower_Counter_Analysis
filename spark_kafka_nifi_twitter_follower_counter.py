@@ -20,7 +20,9 @@ schema = StructType([
     StructField("text", StringType()),
     StructField("user", StructType([
         StructField("id", LongType()),
-        StructField("followers_count", IntegerType())]))
+        StructField("followers_count", IntegerType()),
+        StructField("friends_count", IntegerType()),
+        StructField("statuses_count", IntegerType())]))
 ])
 
 # Setting timeParserPolicy as Legacy to get previous version timeparse behaviour
@@ -42,7 +44,9 @@ value_df = kafka_df.select(from_json(col("value").cast("string"), schema).alias(
 explode_df = value_df.selectExpr("value.timestamp_ms",
                                  "value.text",
                                  "value.user.id",
-                                 "value.user.followers_count")
+                                 "value.user.followers_count",
+                                 "value.user.friends_count",
+                                 "value.user.statuses_count")
 
 def getTeamTag(text):
     if "Fenerbahce" in text or "Fenerbahçe" in text:
@@ -62,6 +66,8 @@ df = explode_df.select(
     col("text"),
     col("id"),
     col("followers_count"),
+    col("friends_count"),
+    col("statuses_count"),
     udfgetTeamTag(col("text")).alias("team")
 )
 
