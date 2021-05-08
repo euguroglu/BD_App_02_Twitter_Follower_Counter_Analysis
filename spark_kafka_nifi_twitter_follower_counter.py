@@ -39,7 +39,10 @@ kafka_df = spark.readStream \
 
 value_df = kafka_df.select(from_json(col("value").cast("string"), schema).alias("value"))
 
-console_query = value_df \
+explode_df = value_df.selectExpr("value.timestamp_ms", "value.text", "value.user.id", "value.user.followers_count")
+
+
+console_query = explode_df \
     .writeStream \
     .queryName("Console Query") \
     .format("console") \
