@@ -43,7 +43,7 @@ console_query = value_df \
     .writeStream \
     .queryName("Console Query") \
     .format("console") \
-    .option("truncate", "false")
+    .option("truncate", "false") \
     .outputMode("append") \
     .start()
 
