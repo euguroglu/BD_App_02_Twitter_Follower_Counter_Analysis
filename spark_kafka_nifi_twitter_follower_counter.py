@@ -76,6 +76,7 @@ df = explode_df.select(
 df = df.select("*").withColumn("timestamp", to_timestamp(col("timestamp")))
 
 window_count_df = df \
+    .withWatermark("timestamp", "10 seconds") \
     .groupBy(col("team"),
         window(col("timestamp"),"2 minutes")) \
         .agg(count("team").alias("count"))
@@ -85,7 +86,7 @@ console_query = window_count_df \
     .queryName("Console Query") \
     .format("console") \
     .option("truncate", "false") \
-    .outputMode("complete") \
+    .outputMode("append") \
     .trigger(processingTime="2 minutes") \
     .start()
 
