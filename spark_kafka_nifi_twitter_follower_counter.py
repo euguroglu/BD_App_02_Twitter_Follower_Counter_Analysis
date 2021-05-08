@@ -16,7 +16,7 @@ spark = SparkSession \
 
 #Preparing schema for tweets
 schema = StructType([
-    StructField("timestamp_ms", LongType()),
+    StructField("timestamp_ms", StringType()),
     StructField("text", StringType()),
     StructField("user", StructType([
         StructField("id", LongType()),
