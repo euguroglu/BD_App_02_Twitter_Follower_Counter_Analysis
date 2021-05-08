@@ -84,8 +84,8 @@ console_query = window_count_df \
     .writeStream \
     .queryName("Console Query") \
     .format("console") \
-    .option("truncate", "true") \
-    .outputMode("append") \
+    .option("truncate", "false") \
+    .outputMode("complete") \
     .trigger(processingTime="2 minutes") \
     .start()
 
