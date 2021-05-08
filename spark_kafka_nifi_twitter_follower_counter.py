@@ -73,13 +73,19 @@ df = explode_df.select(
     udfgetTeamTag(col("text")).alias("team")
 )
 
+window_count_df = df \
+    .withWatermark("timestamp", "2 minutes") \
+    .groupBy(col("team"),
+        window(col("timestamp"),"2 minutes")) \
+        .agg(count("team").alias("count"))
 
-console_query = df \
+console_query = window_count_df \
     .writeStream \
     .queryName("Console Query") \
     .format("console") \
     .option("truncate", "true") \
     .outputMode("append") \
+    .trigger(processingTime="2 minutes") \
     .start()
 
 console_query.awaitTermination()
