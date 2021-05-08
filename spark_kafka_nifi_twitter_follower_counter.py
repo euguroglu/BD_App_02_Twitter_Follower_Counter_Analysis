@@ -39,4 +39,12 @@ kafka_df = spark.readStream \
 
 value_df = kafka_df.select(from_json(col("value").cast("string"), schema).alias("value"))
 
-value_df.show()
+console_query = value_df \
+    .writeStream \
+    .queryName("Console Query") \
+    .format("console") \
+    .option("truncate", "false")
+    .outputMode("append") \
+    .start()
+
+console_query.awaitTermination()
