@@ -35,4 +35,8 @@ kafka_df = spark.readStream \
     .option("startingOffsets", "latest") \
     .load()
 
-kafka_df.printSchema()
+#kafka_df.printSchema()
+
+value_df = kafka_df.select(from_json(col("value").cast("string"), schema).alias("value"))
+
+value_df.show()
