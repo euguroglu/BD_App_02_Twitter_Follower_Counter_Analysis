@@ -39,14 +39,38 @@ kafka_df = spark.readStream \
 
 value_df = kafka_df.select(from_json(col("value").cast("string"), schema).alias("value"))
 
-explode_df = value_df.selectExpr("value.timestamp_ms", "value.text", "value.user.id", "value.user.followers_count")
+explode_df = value_df.selectExpr("value.timestamp_ms",
+                                 "value.text",
+                                 "value.user.id",
+                                 "value.user.followers_count")
+
+def getTeamTag(text):
+    if "Fenerbahce" in text or "Fenerbahçe" in text:
+        result = "Fenerbahce"
+    elif "Galatasaray" in text:
+        result = "Galatasaray"
+    elif "Besiktas" in text or "Beşiktaş" in text:
+        result = "Besiktas"
+    else:
+        result = "Trabzonspor"
+    return result
+
+udfgetTeamTag = udf(lambda tag: getTeamTag(tag), StringType())
+
+df = explode_df.select(
+    col("timestamp_ms"),
+    col("text"),
+    col("id"),
+    col("followers_count"),
+    udfgetTeamTag(col("text")).alias("team")
+)
 
 
-console_query = explode_df \
+console_query = df \
     .writeStream \
     .queryName("Console Query") \
     .format("console") \
-    .option("truncate", "false") \
+    .option("truncate", "true") \
     .outputMode("append") \
     .start()
 
