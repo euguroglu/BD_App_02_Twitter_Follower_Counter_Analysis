@@ -62,7 +62,7 @@ def getTeamTag(text):
 udfgetTeamTag = udf(lambda tag: getTeamTag(tag), StringType())
 
 df = explode_df.select(
-    col("timestamp_ms"),
+    from_unixtime(col("timestamp_ms")),"yyyy-MM-dd HH:mm:ss",
     col("text"),
     col("id"),
     col("followers_count"),
