@@ -73,6 +73,8 @@ df = explode_df.select(
     udfgetTeamTag(col("text")).alias("team")
 )
 
+df = df.select("*").withColumn("timestamp", to_timestamp(col("timestamp")))
+
 window_count_df = df \
     .withWatermark("timestamp", "2 minutes") \
     .groupBy(col("team"),
