@@ -6,6 +6,13 @@ from pyspark.sql.types import *
 KAFKA_TOPIC_NAME_CONS = "twittercounter"
 KAFKA_BOOTSTRAP_SERVERS_CONS = 'localhost:9092'
 
+
+# Cassandra Cluster Details
+cassandra_connection_host = "localhost"
+cassandra_connection_port = "9042"
+cassandra_keyspace_name = "twitter"
+cassandra_table_name = "tweet_club"
+
 #Create Spark Session to Connect Spark Cluster
 spark = SparkSession \
         .builder \
@@ -91,7 +98,11 @@ window_count_df = df \
         window(col("timestamp"),"2 minutes")) \
         .agg(count("team").alias("count"))
 
-console_query = window_count_df \
+window_count_df2 = window_count_df.withColumn("start", expr("window.start"))
+window_count_df3 = window_count_df.withColumn("end", expr("window.end")).drop("window")
+
+
+console_query = window_count_df3 \
     .writeStream \
     .queryName("Console Query") \
     .format("console") \
