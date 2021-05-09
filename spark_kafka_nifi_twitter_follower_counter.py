@@ -13,10 +13,27 @@ cassandra_connection_port = "9042"
 cassandra_keyspace_name = "twitter"
 cassandra_table_name = "tweet_club"
 
+
+# Cassandra database save foreachBatch udf function
+def save_to_cassandra_table(current_df, epoc_id):
+    print("Inside save_to_cassandra_table function")
+    print("Printing epoc_id: ")
+    print(epoc_id)
+
+    current_df \
+    .write \
+    .format("org.apache.spark.sql.cassandra") \
+    .mode("append") \
+    .option("spark.cassandra.connection.host", cassandra_connection_host) \
+    .option("spark.cassandra.connection.port", cassandra_connection_port) \
+    .option("keyspace", cassandra_keyspace_name) \
+    .option("table", cassandra_table_name) \
+    .save()
+    print("Exit out of save_to_cassandra_table function")
 #Create Spark Session to Connect Spark Cluster
 spark = SparkSession \
         .builder \
-        .master("yarn") \
+        .master("local[*]") \
         .appName("TwitterFollowerCount") \
         .config("spark.streaming.stopGracefullyOnShutdown", "true") \
         .getOrCreate()
@@ -101,6 +118,13 @@ window_count_df = df \
 window_count_df2 = window_count_df.withColumn("start", expr("window.start"))
 window_count_df3 = window_count_df2.withColumn("end", expr("window.end")).drop("window")
 
+# Save data to cassandra
+window_count_df3 \
+    .writeStream \
+    .trigger(processingTime='2 minutes') \
+    .outputMode("update") \
+    .foreachBatch(save_to_cassandra_table) \
+    .start()
 
 console_query = window_count_df3 \
     .writeStream \
