@@ -99,7 +99,7 @@ window_count_df = df \
         .agg(count("team").alias("count"))
 
 window_count_df2 = window_count_df.withColumn("start", expr("window.start"))
-window_count_df3 = window_count_df.withColumn("end", expr("window.end")).drop("window")
+window_count_df3 = window_count_df2.withColumn("end", expr("window.end")).drop("window")
 
 
 console_query = window_count_df3 \
