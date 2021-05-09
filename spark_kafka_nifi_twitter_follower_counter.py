@@ -69,7 +69,7 @@ explode_df.writeStream \
   .trigger(processingTime='2 minutes') \
   .format("parquet") \
   .option("path", "hdfs://localhost:9000/tmp/data/twitter") \
-  .option("checkpointLocation", "/home/enes/Applications/data") \
+  .option("checkpointLocation", "/home/enes/Applications/data2") \
   .start()
 
 
