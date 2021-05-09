@@ -63,6 +63,15 @@ udfgetTeamTag = udf(lambda tag: getTeamTag(tag), StringType())
 
 explode_df = explode_df.withColumn("timestamp_ms", col("timestamp_ms").cast(LongType()))
 
+# Write raw data into HDFS
+expolde_df.writeStream \
+  .trigger(processingTime='2 minutes') \
+  .format("parquet") \
+  .option("path", "hdfs://localhost:9000/tmp/data/twitter") \
+  .option("checkpointLocation", "/home/enes/Applications/data") \
+  .start()
+
+
 df = explode_df.select(
     from_unixtime(col("timestamp_ms")/1000,"yyyy-MM-dd HH:mm:ss").alias("timestamp"),
     col("text"),
