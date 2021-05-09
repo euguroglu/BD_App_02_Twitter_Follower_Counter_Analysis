@@ -1,6 +1,7 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
+import uuid
 
 # Kafka Broker/Cluster Details
 KAFKA_TOPIC_NAME_CONS = "twittercounter"
@@ -84,7 +85,12 @@ def getTeamTag(text):
         result = "Trabzonspor"
     return result
 
+def getId():
+    return uuid.uuid4()
+
 udfgetTeamTag = udf(lambda tag: getTeamTag(tag), StringType())
+
+udfgetId = udf(getId())
 
 explode_df = explode_df.withColumn("timestamp_ms", col("timestamp_ms").cast(LongType()))
 
@@ -117,6 +123,7 @@ window_count_df = df \
 
 window_count_df2 = window_count_df.withColumn("start", expr("window.start"))
 window_count_df3 = window_count_df2.withColumn("end", expr("window.end")).drop("window")
+window_count_df4 = window_count_df3.withColumn("id",udfgetId)
 
 # Save data to cassandra
 window_count_df3 \
