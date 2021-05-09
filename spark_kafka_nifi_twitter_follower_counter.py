@@ -35,6 +35,7 @@ kafka_df = spark.readStream \
     .option("kafka.bootstrap.servers", KAFKA_BOOTSTRAP_SERVERS_CONS) \
     .option("subscribe", KAFKA_TOPIC_NAME_CONS) \
     .option("startingOffsets", "latest") \
+    .option("failOnDataLoss", "false") \
     .load()
 
 #kafka_df.printSchema()
@@ -64,7 +65,7 @@ udfgetTeamTag = udf(lambda tag: getTeamTag(tag), StringType())
 explode_df = explode_df.withColumn("timestamp_ms", col("timestamp_ms").cast(LongType()))
 
 # Write raw data into HDFS
-expolde_df.writeStream \
+explode_df.writeStream \
   .trigger(processingTime='2 minutes') \
   .format("parquet") \
   .option("path", "hdfs://localhost:9000/tmp/data/twitter") \
