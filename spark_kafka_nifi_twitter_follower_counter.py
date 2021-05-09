@@ -118,10 +118,10 @@ window_count_df = df \
 
 window_count_df2 = window_count_df.withColumn("start", expr("window.start"))
 window_count_df3 = window_count_df2.withColumn("end", expr("window.end")).drop("window")
-window_count_df4 = window_count_df3.withColumn("id",monotonically_increasing_id())
+window_count_df4 = window_count_df3.withColumn("id", concat(col("team"),col("start")))
 
 # Save data to cassandra
-window_count_df3 \
+window_count_df4 \
     .writeStream \
     .trigger(processingTime='2 minutes') \
     .outputMode("update") \
