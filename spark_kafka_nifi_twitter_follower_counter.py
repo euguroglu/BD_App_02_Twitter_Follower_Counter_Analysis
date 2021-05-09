@@ -9,8 +9,8 @@ KAFKA_BOOTSTRAP_SERVERS_CONS = 'localhost:9092'
 #Create Spark Session to Connect Spark Cluster
 spark = SparkSession \
         .builder \
+        .master("yarn") \
         .appName("TwitterFollowerCount") \
-        .master("local[*]") \
         .config("spark.streaming.stopGracefullyOnShutdown", "true") \
         .getOrCreate()
 
