@@ -1,0 +1,3 @@
+CREATE KEYSPACE twitter WITH replication = {'class': 'SimpleStrategy', 'replication_factor' : 1};
+
+CREATE TABLE tweet_club (team TEXT PRIMARY KEY, count INT, start TIMESTAMP, end TIMESTAMP);

@@ -1,10 +1,10 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import *
 from pyspark.sql.types import *
-import uuid
 
 # Kafka Broker/Cluster Details
 KAFKA_TOPIC_NAME_CONS = "twittercounter"
+KAFKA_TOPIC2_NAME_CONS = "twittercounter2"
 KAFKA_BOOTSTRAP_SERVERS_CONS = 'localhost:9092'
 
 
@@ -13,7 +13,6 @@ cassandra_connection_host = "localhost"
 cassandra_connection_port = "9042"
 cassandra_keyspace_name = "twitter"
 cassandra_table_name = "tweet_club"
-
 
 # Cassandra database save foreachBatch udf function
 def save_to_cassandra_table(current_df, epoc_id):
@@ -110,12 +109,14 @@ df = explode_df.select(
 
 df = df.select("*").withColumn("timestamp", to_timestamp(col("timestamp")))
 
+# Create 2 minutes thumbling window
 window_count_df = df \
     .withWatermark("timestamp", "10 seconds") \
     .groupBy(col("team"),
         window(col("timestamp"),"2 minutes")) \
         .agg(count("team").alias("count"))
 
+# Create unique primary key for cassandra table
 window_count_df2 = window_count_df.withColumn("start", expr("window.start"))
 window_count_df3 = window_count_df2.withColumn("end", expr("window.end")).drop("window")
 window_count_df4 = window_count_df3.withColumn("id", concat(col("team"),col("start")))
@@ -127,6 +128,21 @@ window_count_df4 \
     .outputMode("update") \
     .foreachBatch(save_to_cassandra_table) \
     .start()
+
+
+kafka_df = window_count_df4.select("*")
+
+kafka_target_df = kafka_df.selectExpr("id as key",
+                                             "to_json(struct(*)) as value")
+
+nifi_query = kafka_target_df \
+        .writeStream \
+        .queryName("Notification Writer") \
+        .format("kafka") \
+        .option("kafka.bootstrap.servers", "localhost:9092") \
+        .option("topic", KAFKA_TOPIC2_NAME_CONS) \
+        .outputMode("append") \
+        .start()
 
 console_query = window_count_df3 \
     .writeStream \
