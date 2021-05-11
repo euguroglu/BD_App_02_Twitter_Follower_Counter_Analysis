@@ -142,6 +142,7 @@ nifi_query = kafka_target_df \
         .option("kafka.bootstrap.servers", "localhost:9092") \
         .option("topic", KAFKA_TOPIC2_NAME_CONS) \
         .outputMode("append") \
+        .option("checkpointLocation", "chk-point-dir") \
         .start()
 
 console_query = window_count_df3 \
