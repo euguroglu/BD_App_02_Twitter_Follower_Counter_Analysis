@@ -205,8 +205,8 @@ console_query.awaitTermination()
 
 ![](result.JPG)
 
-- [] Create nifi pipeline to consume kafka data
-- [] Put data into elasticsearch
+- [ ] Create nifi pipeline to consume kafka data
+- [ ] Put data into elasticsearch
 - [x] Check visualization from kibana
 
 ![](result_kibana.JPG)
